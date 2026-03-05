@@ -1,7 +1,5 @@
 [CmdletBinding()]
-param (
-    [switch]$OneLiner
-)
+param ()
 
 $ErrorActionPreference = "Stop"
 
@@ -27,25 +25,7 @@ $psm1Base64 = [Convert]::ToBase64String($psm1Bytes)
 $psd1Bytes = [System.IO.File]::ReadAllBytes($psd1Path)
 $psd1Base64 = [Convert]::ToBase64String($psd1Bytes)
 
-if ($OneLiner) {
-    $outputPath = Join-Path $scriptDir "oneliner-install.md"
-    Write-Host "Generating one-liner markdown script..."
-
-    $minified = "`$m='$moduleName';`$d=if(`$PSVersionTable.PSVersion.Major -ge 6){Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'PowerShell\Modules'}else{Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'WindowsPowerShell\Modules'};`$p=Join-Path `$d `$m;if(Test-Path `$p){Remove-Item `$p -Recurse -Force};`$null=New-Item -Type Directory `$p -Force;[IO.File]::WriteAllBytes((Join-Path `$p `"`$m.psm1`"),[Convert]::FromBase64String('$psm1Base64'));[IO.File]::WriteAllBytes((Join-Path `$p `"`$m.psd1`"),[Convert]::FromBase64String('$psd1Base64'));Import-Module `$m -Force"
-
-    $markdown = @"
-# Copy and Paste Installer
-
-Run the following one-liner in your terminal to install the `$moduleName module:
-
-``````powershell
-$minified
-``````
-"@
-    Set-Content -Path $outputPath -Value $markdown -Encoding UTF8
-    Write-Host "[OK] Build complete: $outputPath" -ForegroundColor Green
-} else {
-    $outputPath = Join-Path $scriptDir "Install-$moduleName.ps1"
+$outputPath = Join-Path $scriptDir "Install-$moduleName.ps1"
     Write-Host "Generating installer script..."
 
     $installerTemplate = @"
@@ -117,4 +97,3 @@ Write-Host "You can now use New-VerifyScript." -ForegroundColor Green
     Set-Content -Path $outputPath -Value $installerTemplate -Encoding UTF8
 
     Write-Host "[OK] Build complete: $outputPath" -ForegroundColor Green
-}
