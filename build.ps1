@@ -93,7 +93,8 @@ Write-Host "[OK] `$moduleName successfully installed and imported." -ForegroundC
 Write-Host "You can now use New-VerifyScript." -ForegroundColor Green
 "@
 
-    # 3. Write installer to disk
-    Set-Content -Path $outputPath -Value $installerTemplate -Encoding UTF8
+    # 3. Write installer to disk without BOM for Invoke-RestMethod compatibility
+    $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+    [System.IO.File]::WriteAllText($outputPath, $installerTemplate, $utf8NoBom)
 
     Write-Host "[OK] Build complete: $outputPath" -ForegroundColor Green
