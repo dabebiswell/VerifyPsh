@@ -1,2 +1,4 @@
 testdata.txt
 Verify-testdata.ps1
+Install-VerifyPsh.ps1
+oneliner-install.md

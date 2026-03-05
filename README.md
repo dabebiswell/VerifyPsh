@@ -10,18 +10,38 @@ Verify.psh provides a simple utility for generating standalone, interactive Powe
 - **Flexible Hashing**: Choose between `SHA256` (default), `SHA384`, `SHA512`, or `MD5` when generating the verification script.
 - **Visual Feedback**: Both the generator and verification scripts include an animated Braille loading spinner during hash calculations, providing clear progress indication for large files.
 
+## Installation
+
+You can install `VerifyPsh` directly into your `CurrentUser` module scope using the compiled installer script.
+
+1. Download or execute the `Install-VerifyPsh.ps1` script on your machine.
+2. The `New-VerifyScript` command is instantly available in your session.
+
+### Building the Installer
+If you modify `VerifyPsh.psm1` or `VerifyPsh.psd1`, you must compile a new installer:
+
+```powershell
+# Standard Installer (Generates Install-VerifyPsh.ps1)
+.\build.ps1
+
+# Ultra-Minimal One-Liner (Generates oneliner-install.md)
+.\build.ps1 -OneLiner
+```
+
+This will encode your changes and regenerate the deployment files.
+
 ## Usage
 
 ### Generating a Verification Script
 
-Use `New-VerifyScript.ps1` to generate a validation script for a target file.
+Use `New-VerifyScript` (now globally available) to generate a validation script for a target file.
 
 ```powershell
 # Basic usage (defaults to SHA256)
-.\New-VerifyScript.ps1 .\my-archive.zip
+New-VerifyScript .\my-archive.zip
 
 # Specify a different algorithm
-.\New-VerifyScript.ps1 .\my-archive.zip -Algorithm SHA512
+New-VerifyScript .\my-archive.zip -Algorithm SHA512
 ```
 
 This will automatically calculate the hash of `my-archive.zip` and generate `Verify-my-archive.ps1` in the same directory.
