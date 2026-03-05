@@ -47,8 +47,28 @@ $fileInfo = Get-Item $resolvedPath
 
 # Calculate Hash
 Write-Verbose "Calculating $Algorithm hash for $($fileInfo.Name)..."
-$hashObj = Get-FileHash -Path $fileInfo.FullName -Algorithm $Algorithm
-$hashString = $hashObj.Hash
+$ps = [powershell]::Create()
+[void]$ps.AddCommand("Get-FileHash").AddParameter("Path", $fileInfo.FullName).AddParameter("Algorithm", $Algorithm)
+
+$asyncResult = $ps.BeginInvoke()
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$chars = [char]0x28BF, [char]0x28FB, [char]0x28FD, [char]0x28FE, [char]0x28F7, [char]0x28EF, [char]0x28DF, [char]0x287F
+$charIndex = 0
+[Console]::CursorVisible = $false
+try {
+    while (-not $asyncResult.IsCompleted) {
+        Write-Host "`r$($chars[$charIndex]) Calculating $Algorithm hash... " -NoNewline -ForegroundColor Cyan
+        $charIndex = ($charIndex + 1) % 8
+        Start-Sleep -Milliseconds 100
+    }
+    Write-Host "`r[OK] Calculating $Algorithm hash... Done!" -ForegroundColor Green
+    $hashObj = $ps.EndInvoke($asyncResult)
+    $hashString = $hashObj.Hash
+} finally {
+    $ps.Dispose()
+    [Console]::CursorVisible = $true
+}
 
 $scriptName = "Verify-$($fileInfo.BaseName).ps1"
 $scriptPath = Join-Path (Split-Path $resolvedPath) $scriptName
@@ -105,9 +125,31 @@ if (-not (Test-Path `$TargetFile)) {
 
 `"Calculating hash, please wait...`" | Write-Info
 
-`$measure = Measure-Command { 
-    `$result = Get-FileHash -Path `$TargetFile -Algorithm `$algorithm
+`$startTime = Get-Date
+
+`$ps = [powershell]::Create()
+[void]`$ps.AddCommand(`"Get-FileHash`").AddParameter(`"Path`", `$TargetFile).AddParameter(`"Algorithm`", `$algorithm)
+
+`$asyncResult = `$ps.BeginInvoke()
+
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+`$chars = [char]0x28BF, [char]0x28FB, [char]0x28FD, [char]0x28FE, [char]0x28F7, [char]0x28EF, [char]0x28DF, [char]0x287F
+`$charIndex = 0
+[Console]::CursorVisible = `$false
+try {
+    while (-not `$asyncResult.IsCompleted) {
+        Write-Host `"`r`$(`$chars[`$charIndex]) Calculating `$algorithm hash... `" -NoNewline -ForegroundColor Cyan
+        `$charIndex = (`$charIndex + 1) % 8
+        Start-Sleep -Milliseconds 100
+    }
+    Write-Host `"`r[OK] Calculating `$algorithm hash... Done!`" -ForegroundColor Green
+    `$result = `$ps.EndInvoke(`$asyncResult)
+} finally {
+    `$ps.Dispose()
+    [Console]::CursorVisible = `$true
 }
+
+`$duration = (Get-Date) - `$startTime
 
 Write-Host `"Expected:    `$expected_hash`"
 Write-Host `"Actual:      `$(`$result.Hash)`"
@@ -115,12 +157,12 @@ Write-Host `"`"
 
 if (`$result.Hash -eq `$expected_hash) {
     `"MATCH. The file integrity has been verified.`" | Write-Pass
-    Write-Host `"Verification took `$(`$measure.TotalSeconds.ToString('F2')) seconds.`" -ForegroundColor DarkGray
+    Write-Host `"Verification took `$(`$duration.TotalSeconds.ToString('F2')) seconds.`" -ForegroundColor DarkGray
     if (-not `$NoPause) { Read-Host `"Press Enter to exit...`" }
     exit 0
 } else {
     `"MISMATCH. The file does not match the expected hash!`" | Write-Fail
-    Write-Host `"Verification took `$(`$measure.TotalSeconds.ToString('F2')) seconds.`" -ForegroundColor DarkGray
+    Write-Host `"Verification took `$(`$duration.TotalSeconds.ToString('F2')) seconds.`" -ForegroundColor DarkGray
     if (-not `$NoPause) { Read-Host `"Press Enter to exit...`" }
     exit 1
 }
