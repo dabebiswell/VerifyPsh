@@ -4,7 +4,7 @@ Verify.psh provides a simple utility for generating standalone, interactive Powe
 
 ## Features
 
-- **Double-Click Friendly**: The generated scripts display interactive pass/fail output and wait for the user to press Enter before exiting.
+- **Right-Click Friendly**: The generated scripts display interactive pass/fail output and wait for the user to press Enter before exiting. They are built to safely execute via the "Run with PowerShell" context menu.
 - **Pipeline Ready**: Generated scripts return standard exit codes (`0` for Success, `1` for Failure/Missing) and can be run non-interactively using the `-NoPause` switch.
 - **Parametric Targeting**: The output scripts default to checking the file they were generated for, but can accept alternate file paths via the `-TargetFile` parameter.
 - **Flexible Hashing**: Choose between `SHA256` (default), `SHA384`, `SHA512`, or `MD5` when generating the verification script.
@@ -31,8 +31,8 @@ Distribute both your file (`my-archive.zip`) and its generated validation script
 
 The user can natively execute it in three ways:
 
-1. **Interactively (Double-click / Terminal)**
-   Normally, running the script natively will calculate the checksum, report the result, and pause:
+1. **Interactively (Right-Click -> Run with PowerShell)**
+   Normally, running the script natively from the right-click menu will calculate the checksum, report the result, and pause:
    ```powershell
    .\Verify-my-archive.ps1
    ```

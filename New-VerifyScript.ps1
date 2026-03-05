@@ -35,10 +35,21 @@ $scriptContent = @"
 [CmdletBinding()]
 param (
     [Parameter(Position=0)]
-    [string]`$TargetFile = `"`$PSScriptRoot\$($fileInfo.Name)`",
+    [string]`$TargetFile,
 
     [switch]`$NoPause
 )
+
+if ([string]::IsNullOrWhiteSpace(`$TargetFile)) {
+    `$scriptDir = `$PSScriptRoot
+    if ([string]::IsNullOrEmpty(`$scriptDir)) {
+        `$scriptDir = Split-Path -Parent `$MyInvocation.MyCommand.Path
+    }
+    if ([string]::IsNullOrEmpty(`$scriptDir)) {
+        `$scriptDir = `$PWD.Path
+    }
+    `$TargetFile = Join-Path `$scriptDir `"$($fileInfo.Name)`"
+}
 
 `$expected_hash = `"$hashString`"
 `$algorithm = `"$Algorithm`"
