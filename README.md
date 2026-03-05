@@ -48,14 +48,3 @@ The user can natively execute it in three ways:
    ```powershell
    .\Verify-my-archive.ps1 -TargetFile "C:\Downloads\my-archive-copy.zip"
    ```
-
-## Security Considerations
-
-*Note: Generating a verification script does not make the file tamper-proof.*
-
-If a malicious actor alters a file in transit, they could also easily update the hash inside the companion `Verify-*.ps1` script so that it falsely validates the tampered file. 
-
-To cryptographically ensure that the validation mechanism itself hasn't been tampered with, you should adopt one of the following strategies:
-- **Authenticode Signing**: Sign the generated `.ps1` script using a Code Signing Certificate. If execution policies are enforced (`AllSigned` or `RemoteSigned`), Windows will refuse to run the generated script if any text inside the script has been modified.
-- **Detached Signatures**: Generate a GPG/PGP signature for the target file and distribute a `.sig` file, having the user execute their own validation.
-- **Trusted Endpoints**: Modify the generated scripts to dynamically retrieve known-good hashes from an HTTPS endpoint you explicitly control.
