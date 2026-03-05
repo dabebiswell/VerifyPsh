@@ -14,8 +14,13 @@ Verify.psh provides a simple utility for generating standalone, interactive Powe
 
 You can install `VerifyPsh` directly into your `CurrentUser` module scope using the compiled installer script.
 
-1. Download or execute the `Install-VerifyPsh.ps1` script on your machine.
-2. The `New-VerifyScript` command is instantly available in your session.
+The easiest way is to run this command in your PowerShell terminal:
+
+```powershell
+irm https://github.com/dabebiswell/VerifyPsh/releases/latest/download/Install-VerifyPsh.ps1 | iex
+```
+
+Alternatively, you can manually download or execute the `Install-VerifyPsh.ps1` script on your machine. Once installed, the `New-VerifyScript` command is instantly available in your session.
 
 ### Building the Installer
 If you modify `VerifyPsh.psm1` or `VerifyPsh.psd1`, you must compile a new installer:
