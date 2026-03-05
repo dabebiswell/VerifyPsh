@@ -1,12 +1,45 @@
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory=$true, ValueFromPipeline=$true)]
-    [ValidateNotNullOrEmpty()]
+    [Parameter(Position=0, ValueFromPipeline=$true)]
     [string]$TargetFile,
 
     [ValidateSet("SHA256", "SHA384", "SHA512", "MD5")]
-    [string]$Algorithm = "SHA256"
+    [string]$Algorithm = "SHA256",
+
+    [switch]$Interactive
 )
+
+if ([string]::IsNullOrWhiteSpace($TargetFile) -or $Interactive) {
+    Write-Host "=== New Verification Script Generator ===" -ForegroundColor Cyan
+    
+    if ([string]::IsNullOrWhiteSpace($TargetFile)) {
+        $TargetFile = Read-Host "Enter the path to the target file to verify"
+    }
+    
+    while (-not (Test-Path $TargetFile -PathType Leaf)) {
+        if (-not [string]::IsNullOrWhiteSpace($TargetFile)) {
+            Write-Host "File not found: $TargetFile" -ForegroundColor Red
+        }
+        $TargetFile = Read-Host "Enter a valid path to the target file"
+    }
+    
+    Write-Host ""
+    Write-Host "Select a hashing algorithm (Current: $Algorithm):"
+    $algoOptions = @("SHA256", "SHA384", "SHA512", "MD5")
+    for ($i = 0; $i -lt $algoOptions.Length; $i++) {
+        Write-Host "  $($i + 1). $($algoOptions[$i])"
+    }
+    
+    $algoChoice = Read-Host "Enter choice (1-4) or press Enter to keep [$Algorithm]"
+    $choiceInt = 0
+    if ([int]::TryParse($algoChoice, [ref]$choiceInt) -and $choiceInt -ge 1 -and $choiceInt -le 4) {
+        $Algorithm = $algoOptions[$choiceInt - 1]
+    }
+    Write-Host ""
+} elseif (-not (Test-Path $TargetFile -PathType Leaf)) {
+    Write-Error "Target file not found: $TargetFile"
+    exit 1
+}
 
 # Resolve path correctly
 $resolvedPath = Resolve-Path $TargetFile
